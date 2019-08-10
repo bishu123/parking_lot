@@ -25,9 +25,8 @@ var CommandToArgMap = map[CommandType]int{
 type ErrorType string
 
 const (
-	ErrorInvalidCommand            ErrorType = "Invalid Command"
-	ErrorParkingFull               ErrorType = "Parking Full"
-	ErrorParkingNotInitialized     ErrorType = "Parking Not Initialized"
-	ErrorParkingAlreadyInitialized ErrorType = "Paring Already Initialized"
-	ErrorArgumentMisMatch          ErrorType = "Argument MisMatch"
+	ErrorInvalidCommand        ErrorType = "Invalid Command"
+	ErrorParkingAlreadyCreated ErrorType = "parking Already Created"
+	ErrorArgumentMisMatch      ErrorType = "Argument MisMatch"
+	ErrorParkingFull           ErrorType = "sorry, parking lot is full"
 )

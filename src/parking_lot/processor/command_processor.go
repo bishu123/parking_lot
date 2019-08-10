@@ -2,14 +2,19 @@ package processor
 
 import (
 	"fmt"
+	"strings"
+	"sync"
+
 	"parking_lot/constants"
 	"parking_lot/models"
 	"parking_lot/park"
 	"parking_lot/util"
-	"strings"
 )
 
-func processInput(inputStr string){
+var parkingErr *CustomErrorType
+var onceErr sync.Once
+
+func processInput(inputStr string) {
 	splitParameter := strings.Split(inputStr, " ")
 	if len(splitParameter) < 1 {
 		fmt.Println(constants.ErrorInvalidCommand)
@@ -21,7 +26,7 @@ func processInput(inputStr string){
 	if !ok {
 		fmt.Println(constants.ErrorInvalidCommand)
 	}
-	if commandParams != len(params){
+	if commandParams != len(params) {
 		fmt.Println(constants.ErrorArgumentMisMatch)
 	}
 	processCommand(command, params)
@@ -29,6 +34,9 @@ func processInput(inputStr string){
 
 func processCommand(command constants.CommandType, params []string) {
 	parkingLotObj := park.GetInstance()
+	onceErr.Do(func() {
+		parkingErr = &CustomErrorType{}
+	})
 	switch command {
 	case constants.CommandCreate:
 		capacity, err := util.StringToInt(params[0])
@@ -36,33 +44,41 @@ func processCommand(command constants.CommandType, params []string) {
 			fmt.Println("Error while parsing Capacity of parking lot", params[0], err)
 			return
 		}
-		parkingLotObj.Create(capacity)
+		parkingErr.CustomError(func() error {
+			return parkingLotObj.Create(capacity)
+		})
 	case constants.CommandPark:
 		regNo := params[0]
 		licenceNo := params[1]
 		vehicle := models.CreateVehicle(licenceNo, regNo)
-		parkingLotObj.Park(vehicle)
+		parkingErr.CustomError(func() error {
+			return parkingLotObj.Park(vehicle)
+		})
 	case constants.CommandLeave:
 		slot, err := util.StringToInt(params[0])
 		if err != nil {
-			fmt.Println("Error while parsing slot for unparking", params[0], err )
+			fmt.Println("Error while parsing slot for unparking", params[0], err)
 			return
 		}
-		parkingLotObj.Leave(slot)
+		parkingErr.CustomError(func() error {
+			return parkingLotObj.Leave(slot)
+		})
 	case constants.CommandStatus:
 		parkingLotObj.Status()
 	case constants.CommandColorToReg:
 		color := params[0]
-		parkingLotObj.ColorToVehicle(color)
+		parkingErr.CustomError(func() error {
+			return parkingLotObj.ColorToVehicle(color)
+		})
 	case constants.CommandColorToSlot:
 		color := params[0]
-		parkingLotObj.ColorToSlot(color)
+		parkingErr.CustomError(func() error {
+			return parkingLotObj.ColorToSlot(color)
+		})
 	case constants.CommandSlotToReg:
-		slot, err := util.StringToInt(params[0])
-		if err != nil {
-			fmt.Println("Error while parsing slot for fetching vehicle registration number", params[0], err )
-			return
-		}
-		parkingLotObj.GetVehicleOnSlot(slot)
+		regNo := params[0]
+		parkingErr.CustomError(func() error {
+			return parkingLotObj.RegNoToSlot(regNo)
+		})
 	}
 }
