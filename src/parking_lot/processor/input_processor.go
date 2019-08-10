@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func ProcessFromFile(filePath string)  {
+func ProcessFromFile(filePath string) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		panic(err)
@@ -15,7 +15,7 @@ func ProcessFromFile(filePath string)  {
 	ReadInput(f)
 }
 
-func ProcessFromConsole(){
+func ProcessFromConsole() {
 	ReadInput(os.Stdin)
 }
 
@@ -30,4 +30,3 @@ func ReadInput(reader io.Reader) {
 		}
 	}
 }
-

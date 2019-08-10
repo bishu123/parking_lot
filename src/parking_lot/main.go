@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+
 	"parking_lot/processor"
 )
 
@@ -12,14 +13,15 @@ const  (
 func main(){
 	args := os.Args
 	switch len(args) {
-	case 0:
+	case 1:
 		// Interactive Mode
 		processor.ProcessFromConsole()
-	case 1:
+	case 2:
 		// Read Input From File
 		inputFile := os.Args[1]
 		processor.ProcessFromFile(inputFile)
 	default:
 		os.Exit(ExitingAsErrorInArgs)
 	}
+	return
 }

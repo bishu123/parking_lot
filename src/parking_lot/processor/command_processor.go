@@ -15,7 +15,7 @@ var parkingErr *CustomErrorType
 var onceErr sync.Once
 
 func processInput(inputStr string) {
-	splitParameter := strings.Split(inputStr, " ")
+	splitParameter := strings.Split(strings.Trim(inputStr," "), " ")
 	if len(splitParameter) < 1 {
 		fmt.Println(constants.ErrorInvalidCommand)
 		return
@@ -25,6 +25,7 @@ func processInput(inputStr string) {
 	commandParams, ok := constants.CommandToArgMap[command]
 	if !ok {
 		fmt.Println(constants.ErrorInvalidCommand)
+		return
 	}
 	if commandParams != len(params) {
 		fmt.Println(constants.ErrorArgumentMisMatch)
@@ -48,16 +49,16 @@ func processCommand(command constants.CommandType, params []string) {
 			return parkingLotObj.Create(capacity)
 		})
 	case constants.CommandPark:
-		regNo := params[0]
-		licenceNo := params[1]
-		vehicle := models.CreateVehicle(licenceNo, regNo)
+		licenceNo := params[0]
+		color := params[1]
+		vehicle := models.CreateVehicle(licenceNo, color)
 		parkingErr.CustomError(func() error {
 			return parkingLotObj.Park(vehicle)
 		})
 	case constants.CommandLeave:
 		slot, err := util.StringToInt(params[0])
 		if err != nil {
-			fmt.Println("Error while parsing slot for unparking", params[0], err)
+			fmt.Println("Error while parsing slot for un-parking", params[0], err)
 			return
 		}
 		parkingErr.CustomError(func() error {
@@ -81,4 +82,5 @@ func processCommand(command constants.CommandType, params []string) {
 			return parkingLotObj.RegNoToSlot(regNo)
 		})
 	}
+	return
 }

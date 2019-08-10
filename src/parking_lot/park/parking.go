@@ -3,6 +3,7 @@ package park
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 
@@ -49,12 +50,13 @@ func (p *ParkingLot) Create(capacity int) error {
 	p.slotVehicleMap = make(map[int]*models.Vehicle)
 	p.colorRegNoMap = make(map[string]map[int]string)
 	fmt.Printf("Created a parking lot with %v slots", capacity)
+	fmt.Println()
 	return nil
 }
 
 func (p *ParkingLot) Park(vehicle *models.Vehicle) error {
-	for slot := 0; slot < p.maximumSlot; slot++ {
-		if value, ok := p.slotVehicleMap[slot]; value != nil && !ok {
+	for slot := 1; slot <= p.maximumSlot; slot++ {
+		if value, ok := p.slotVehicleMap[slot]; value == nil && !ok {
 			p.slotVehicleMap[slot] = vehicle
 			p.putColorToVehicleMap(slot, vehicle)
 			p.regNoSlotMap[vehicle.LicenceNumber] = slot
@@ -77,6 +79,7 @@ func (p *ParkingLot) Leave(slot int) error {
 		delete(p.slotVehicleMap, slot)
 		p.availableSlot += 1
 		fmt.Printf("Slot number %v is free", slot)
+		fmt.Println()
 	}
 	return nil
 }
@@ -84,9 +87,9 @@ func (p *ParkingLot) Leave(slot int) error {
 func (p *ParkingLot) Status() {
 	// returning the result in the sorted occupied slot.
 	fmt.Println("Slot No.		Registration No		Colour")
-	for slot := 0; slot < p.maximumSlot; slot++ {
+	for slot := 0; slot <= p.maximumSlot; slot++ {
 		if vehicle, ok := p.slotVehicleMap[slot]; ok {
-			fmt.Println(slot, "\t\t", vehicle.LicenceNumber, "\t\t", vehicle.Color)
+			fmt.Println(slot, "\t\t\t", vehicle.LicenceNumber, "\t\t", vehicle.Color)
 		}
 	}
 }
@@ -101,8 +104,11 @@ func (p *ParkingLot) ColorToVehicle(color string) error {
 			vehicleList = append(vehicleList, regNo)
 		}
 	}
+	sort.Slice(vehicleList, func(i, j int) bool {
+		return vehicleList[i] < vehicleList[j]
+	})
 	if len(vehicleList) > 0 {
-		fmt.Println(strings.Join(vehicleList, ","))
+		fmt.Println(strings.Join(vehicleList, ", "))
 	}
 	return nil
 }
@@ -117,17 +123,21 @@ func (p *ParkingLot) ColorToSlot(color string) error {
 			slotList = append(slotList, util.IntToString(slot))
 		}
 	}
+	sort.Slice(slotList, func(i, j int) bool {
+		return slotList[i] < slotList[j]
+	})
 	if len(slotList) > 0 {
-		fmt.Println(strings.Join(slotList, ","))
+		fmt.Println(strings.Join(slotList, ", "))
 	}
 	return nil
 }
 
 func (p *ParkingLot) RegNoToSlot(regNo string) error {
-	if slot, ok := p.regNoSlotMap[regNo]; !ok {
+	if slot, ok := p.regNoSlotMap[regNo]; ok {
 		fmt.Println(slot)
 	} else {
 		regNoErr := fmt.Errorf("Not Found")
 		return errors.New(regNoErr.Error())
 	}
+	return nil
 }
